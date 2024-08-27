@@ -1,0 +1,225 @@
+var refresh_to = null;
+var field_name_jx = null;
+$(document).ready(function () {
+    var lang = 'es';
+    /* order... */
+    $("#orderlistproduct").change(function () {
+        strloc = self.location.href.split("?");
+        location.href = strloc[0] + "?ordr=" + $(this).val();
+    })
+
+    $('input[name=shipping]').click(function () {
+        $val = $(this).val();
+        $(".shipw").attr("disabled", true);
+        $("#ship_weight_" + $val).attr("disabled", false);
+    });
+
+    $valsel = $('input[name=shipping]:checked').val();
+    $(".shipw").attr("disabled", 'disabled');
+    $("#ship_weight_" + $valsel).attr("disabled", false);
+
+    $(".shipw").change(function () {
+        $id = $(this).attr('id');
+        val = $(this).val();
+        $.get(baseurl + 'cart/ajaxmod/ship_weight_local/getmoney/?id=' + val, function (data) {
+//       alert('#js_'+$id);
+            $('#js_' + $id).html(data);
+        });
+    })
+    $('.shipping-radio').change(function () {
+        $('.shipping_select select').removeClass('error');
+        $('.shipping_select').find('label').remove();
+        $('#shipping-form').valid();
+    });
+
+
+    /*Solo numeros*/
+    $('.OnlyNumbers').keypress(function (e) {
+        if (e.which != 8 && e.which != 0 && (e.which <= 48 || e.which > 57)) {
+            return false;
+        }
+    })
+
+    /*$(".rtb").each(function (index) {
+        rtbid = $(this).attr('id');
+        WYSIWYG.attach(rtbid, full);
+    });*/
+    tinymce.init({
+        // General options
+        selector: '.rtb',
+        plugins: [
+            "advlist autolink autosave link image lists charmap print preview hr anchor pagebreak",
+            "searchreplace wordcount visualblocks visualchars code fullscreen insertdatetime media nonbreaking",
+            "table contextmenu directionality emoticons template textcolor paste fullpage textcolor colorpicker textpattern jbimages"
+        ],
+
+        toolbar1: "newdocument fullpage | bold italic underline strikethrough | alignleft aligncenter alignright alignjustify | styleselect formatselect fontselect fontsizeselect jbimages",
+        toolbar2: "cut copy paste | searchreplace | bullist numlist | outdent indent blockquote | undo redo | link unlink anchor image media code | insertdatetime preview | forecolor backcolor",
+        toolbar3: "table | hr removeformat | subscript superscript | charmap emoticons | print fullscreen | ltr rtl | visualchars visualblocks nonbreaking template pagebreak restoredraft",
+
+        menubar: false,
+        toolbar_items_size: 'small',
+
+        style_formats: [
+            {title: 'Bold text', inline: 'b'},
+            {title: 'Red text', inline: 'span', styles: {color: '#ff0000'}},
+            {title: 'Red header', block: 'h1', styles: {color: '#ff0000'}},
+            {title: 'Example 1', inline: 'span', classes: 'example1'},
+            {title: 'Example 2', inline: 'span', classes: 'example2'},
+            {title: 'Table styles'},
+            {title: 'Table row 1', selector: 'tr', classes: 'tablerow1'}
+        ],
+
+        templates: [
+            {title: 'Test template 1', content: 'Test 1'},
+            {title: 'Test template 2', content: 'Test 2'}
+        ],
+        language: 'es',
+        relative_urls: false
+
+    });
+
+    /*Admin*/
+    $(".HeadModule").click(function () {
+        id = $(this).attr('id');
+        str = id.split("admingen_");
+        module = str[1];
+        $(".BodyModule").hide("normal");
+        $(".BM_" + module).slideToggle('slow');
+    })
+
+    $(".HeadTextModule").hover(
+        function () {
+            $(this).stop().animate({paddingRight: "15px"}, 200);
+        },
+        function () {
+            $(this).stop().animate({paddingRight: "0px"});
+        }
+    );
+
+    /**/
+    $(".gallery").prettyPhoto({
+        theme: 'facebook',
+        animationSpeed: 'slow', /* fast/slow/normal */
+        opacity: 0.00,
+        modal: true
+    });
+
+//   $('.DatePicker').datepicker({
+//   buttonImage:  
+//   });
+    $(".DatePicker").datepicker({
+        showOn: 'button',
+        buttonImage: baseurl + 'media/js/calendar_icon.gif',
+        buttonImageOnly: true,
+        dateFormat: "yy-mm-dd"
+    });
+
+    $('.DateTimePicker').datepicker({
+        duration: '',
+        showTime: true,
+        constrainInput: false,
+        stepMinutes: 1,
+        stepHours: 1,
+        altTimeField: '',
+        time24h: true
+    });
+    $.datepicker.regional[lang];
+    $(".SpinnerNumber").spinner();
+    $(".AjaxOTO").click(function () {
+        id = $(this).attr('id');
+        field_name_jx = $(this).attr('field_name');
+        refresh_to = $(this).attr('refresh_to');
+
+        $.ajax({
+            type: "GET",
+            url: $(this).attr('href') + '?AJAX_NO_LOAD=TRUE',
+            success: function (html) {
+                $("." + id).html(html);
+                $("." + id).dialog({width: 600, autoOpen: false, modal: true});
+                $("." + id).dialog('open');
+            }
+        });
+        return false;
+    });
+
+    $("#new_order_comment_button").click(function () {
+        var txt        = $("#new_order_comment_text").val(),
+            href       = $("#new_order_comment_button").data('url'),
+            client_id  = $("#new_order_comment_button").data('client_id'),
+            client_name = $("#new_order_comment_button").data('client_name'),
+            client_avatar = $("#new_order_comment_button").data('client_avatar'),
+            order_id   = $("#new_order_comment_button").data('order_id'),
+            template   = '' +
+                '<div class="media comment_section">'+
+                '<div class="pull-left post_comments">'+
+                '<a href="#"><img src="'+client_avatar+'" class="img-circle" alt=""></a>'+
+                '</div>'+
+                '<div class="media-body post_reply_comments">'+
+                '<h3>'+client_name+'</h3>'+
+                '<h4>{$created_at}</h4>'+
+                '<div>'+txt.replace(/\n/g, "<br />")+'</div>'+
+                '{$attached}'+
+                '</div>';
+                '</div>';
+
+        if(txt != ''){
+            $('.loader').show();
+            $('#new_order_comment_button').attr("disabled", true);
+            var formData = new FormData();
+            formData.append('message', txt);
+            formData.append('client_id', client_id);
+            formData.append('order_id', order_id);
+            formData.append('attached', $('#attached')[0].files[0]);
+            $.ajax({
+                type: "POST",
+                url: href,
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    var attached = '';
+                    if(response.attached != '#'){
+                        attached = '<div><a href="'+response.attached+'" target="_blank" class="general-link"><small class="fa fa-download">&nbsp;</small>[Descargar Adjunto]</a></div>'
+                    }
+
+                    var row = template.replace("{$created_at}", response.created_at);
+                    row = row.replace("{$attached}", attached);
+                    $("#direct-chat-container").append(row);
+                    $("#new_order_comment_text").val('');
+                    $("#attached").val('');
+                    setTimeout(function(){
+                        $('.loader').hide();
+                        $('#new_order_comment_button').attr("disabled", false);
+                    }, 1000);
+                }
+            });
+        }
+        return false;
+    });
+
+
+})
+
+function post_ajax(form) {
+    $.ajax({
+        type: "POST",
+        url: $(form).attr('action'),
+        data: $(form).serialize(),
+        success: function (html) {
+            $("." + id).html(html);
+            if (!(refresh_to == null && field_name_jx == null)) {
+                $.ajax({
+                    type: "GET",
+                    url: refresh_to + '?AJAX_NO_LOAD=TRUE',
+                    success: function (html) {
+                        $(".tbltd_" + field_name_jx).html(html);
+                    }
+                });
+            }
+            refresh_to = null;
+            field_name = null;
+        }
+    });
+    return false;
+}

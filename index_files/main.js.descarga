@@ -1,0 +1,138 @@
+window.fbAsyncInit = function() {
+	FB.init({
+		appId      : '1279739865417415',
+		xfbml      : true,
+		version    : 'v2.8'
+	});
+	FB.AppEvents.logPageView();
+};
+
+(function(d, s, id){
+	var js, fjs = d.getElementsByTagName(s)[0];
+	if (d.getElementById(id)) {return;}
+	js = d.createElement(s); js.id = id;
+	js.src = "//connect.facebook.net/en_US/sdk.js";
+	fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));
+
+jQuery(function($) {'use strict',
+
+	$('[data-toggle="tooltip"]').tooltip();
+
+	//#main-slider
+	$(function(){
+		$('#main-slider.carousel').carousel();
+	});
+
+
+	// accordian
+	$('.accordion-toggle').on('click', function(){
+		$(this).closest('.panel-group').children().each(function(){
+		$(this).find('>.panel-heading').removeClass('active');
+		 });
+
+	 	$(this).closest('.panel-heading').toggleClass('active');
+	});
+
+	//Initiat WOW JS
+	new WOW().init();
+
+	// portfolio filter
+	$(window).load(function(){'use strict';
+		var $portfolio_selectors = $('.portfolio-filter >li>a');
+		var $portfolio = $('.portfolio-items');
+		$portfolio.isotope({
+			itemSelector : '.portfolio-item',
+			layoutMode : 'fitRows'
+               });
+		
+		$portfolio_selectors.on('click', function(){
+			$portfolio_selectors.removeClass('active');
+			$(this).addClass('active');
+			var selector = $(this).attr('data-filter');
+			$portfolio.isotope({ filter: selector });
+			return false;
+		});
+	});
+
+	// Contact form
+	var form = $('#main-contact-form');
+	form.submit(function(event){
+		event.preventDefault();
+		var form_status = $('<div class="form_status"></div>');
+		$.ajax({
+			url: $(this).attr('action'),
+
+			beforeSend: function(){
+				form.prepend( form_status.html('<p><i class="fa fa-spinner fa-spin"></i> Email is sending...</p>').fadeIn() );
+			}
+		}).done(function(data){
+			form_status.html('<p class="text-success">' + data.message + '</p>').delay(3000).fadeOut();
+		});
+	});
+
+	
+	//goto top
+	$('.gototop').click(function(event) {
+		event.preventDefault();
+		$('html, body').animate({
+			scrollTop: $("body").offset().top
+		}, 500);
+	});	
+
+	//Pretty Photo
+	$("a[rel^='prettyPhoto']").prettyPhoto({
+		social_tools: false
+	});
+
+	$(document.body).on('click', '.share-facebook', function () {
+		var url			= $(this).data('url'),
+			picture		= $(this).data('picture'),
+			title		= $(this).data('title'),
+			description = $(this).data('description');
+
+		var objeto = {
+			method:     'share',
+			href:       url,     // The same than link in feed method
+			title:      title,  // The same than name in feed method
+			picture:    picture,
+			caption:    'Floreriarosabel.com',
+			description:description,
+		};
+		console.log(objeto);
+		FB.ui(objeto,
+			function(response) {
+				self.close();
+			});
+		/*FB.ui({
+		 method: 'send',
+		 link: url,
+		 });*/
+	});
+
+	/* Moved from utill.js ato remove this file */
+	$("#galeryjsall").click(function(){
+		$("#imggal_0").click();
+		return false;
+	});
+
+	$("#currency").change(function(){
+		strloc = self.location.href.split("?");
+		location.href = strloc[0] +"?currency="+$(this).val();
+	});
+
+	$("#ship_district").change(function(){
+		val = $(this).val();
+		$.get(baseurl+'cart/ajaxmod/ship_district/getmoney/?id='+val, function(data) {
+			$('#js_Ship_district').html(data);
+		});
+	});
+
+	$("#ship_weight_local").change(function(){
+		val = $(this).val();
+		$.get(baseurl+'cart/ajaxmod/ship_weight_local/getmoney/?id='+val, function(data) {
+			$('#js_Ship_weight_local').html(data);
+		});
+	});
+
+});

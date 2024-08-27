@@ -1,0 +1,83 @@
+class CustomIntlTelImput {
+    input_id;
+    input;
+    hiddenInput;
+    iti;
+    default_country;
+    utils_url;
+    errorMap;
+    errorMsg;
+    validMsg;
+    submitButton;
+
+    constructor(input_id, country = 'PE', base_url = '') {
+        this.input_id = input_id;
+        this.input = document.querySelector(`#${input_id}`);
+        this.default_country = (country == '') ? 'PE' : country;
+        this.utils_url = base_url + "/media/corlate/js/intlTelInputUtils.js";
+        this.errorMap = ["Invalid number", "Invalid country code", "Too short", "Too long", "Invalid number"];
+        this.errorMsg = document.querySelector("#error-msg");
+        this.validMsg = document.querySelector("#valid-msg");
+        this.submitButton = document.getElementById('register-submit-button');//document.querySelector("#register-submit-button");
+        //this.geoLocation();
+    }
+
+    init() {
+        this.iti = window.intlTelInput(this.input, {
+            initialCountry: this.default_country,
+            nationalMode: true,
+            separateDialCode: true,
+            hiddenInput: "full_phone",
+            utilsScript: this.utils_url + "?1638200991544" // just for formatting/placeholders etc
+        });
+        
+        this.hiddenInput = document.querySelector('[name="full_phone"]');
+
+        let _this = this;
+        this.input.addEventListener('blur', function() {
+            _this.reset(_this);
+            _this.fill_hidden_input();
+        });
+
+        this.input.addEventListener('change', this.reset(this));
+        this.input.addEventListener('keyup', this.reset(this));
+        if(this.input.value != '' && this.hiddenInput.value == '') {
+            this.input.focus();
+        }
+    }
+
+    fill_hidden_input(){
+        let _this = this;
+        if (_this.input.value.trim()) {
+            if (_this.iti.isValidNumber()) {
+                //_this.validMsg.classList.remove("hide");
+                this.hiddenInput.value = _this.iti.getNumber();
+            } else {
+              /*_this.input.classList.add("error");
+              const errorCode = _this.iti.getValidationError();
+              _this.errorMsg.innerHTML = _this.errorMap[errorCode];
+              _this.errorMsg.classList.remove("hide");*/
+            }
+        }
+    }
+
+    reset(_this) {
+      _this.input.classList.remove("error");
+      _this.errorMsg.innerHTML = "";
+      _this.errorMsg.classList.add("hide");
+      _this.validMsg.classList.add("hide");
+    }
+
+    destroy(){
+      this.iti.destroy();
+    }
+
+    async geoLocation() {
+        let obj;
+        const res = await fetch('https://api.ipregistry.co/?key=tryout')
+        obj = await res.json();
+        console.log(obj);
+        this.default_country = obj.location.country.code
+        //return obj;
+    }
+}
